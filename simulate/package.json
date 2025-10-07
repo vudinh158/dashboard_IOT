@@ -1,0 +1,11 @@
+{
+    "name": "simulate-iot",
+    "type": "module",
+    "dependencies": {
+      "node-fetch": "^3.3.2"
+    },
+    "scripts": {
+      "start": "node simulate.js"
+    }
+  }
+  
