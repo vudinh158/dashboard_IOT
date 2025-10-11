@@ -1,44 +1,77 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "https://az5hwgyc06.execute-api.ap-southeast-1.amazonaws.com";
+const API_BASE = import.meta.env.VITE_API_BASE || "/api";
 
-function coerceArray(data) {
-  // data là JSON đã parse từ fetch
-  if (Array.isArray(data)) return data;                     // OK: mảng
-  if (data?.Items && Array.isArray(data.Items)) return data.Items; // kiểu DynamoDB raw
-
-  // Một số cấu hình API Gateway/Lambda trả { statusCode, body: "json-string" }
+/**
+ * Helper function để "mở gói" response từ API Gateway.
+ * Nhiều Lambda function trả về dạng { statusCode, body: "json-string" }.
+ * Hàm này sẽ lấy và parse nội dung trong `body` nếu có.
+ * @param {object} data - Dữ liệu JSON đã parse từ fetch.
+ * @returns {object|Array} - Dữ liệu bên trong đã được "mở gói".
+ */
+function unwrapApiResponse(data) {
   if (data?.body) {
     try {
-      const inner = typeof data.body === "string" ? JSON.parse(data.body) : data.body;
-      if (Array.isArray(inner)) return inner;
-      if (inner?.Items && Array.isArray(inner.Items)) return inner.Items;
-    } catch (_) { /* ignore */ }
+      return typeof data.body === "string" ? JSON.parse(data.body) : data.body;
+    } catch {
+      // Bỏ qua nếu parse lỗi, trả về data gốc
+    }
   }
-  return []; // fallback
+  return data;
 }
+
+/**
+ * Helper function để đảm bảo kết quả luôn là một mảng.
+ * Xử lý được cả kết quả thô từ DynamoDB (`{ Items: [...] }`).
+ * @param {any} data - Dữ liệu đã được "mở gói".
+ * @returns {Array} - Luôn trả về một mảng.
+ */
+function coerceArray(data) {
+  if (Array.isArray(data)) return data;
+  if (data?.Items && Array.isArray(data.Items)) return data.Items;
+  return [];
+}
+
 
 export async function fetchDevices() {
   const res = await fetch(`${API_BASE}/devices`);
-  const json = await res.json().catch(() => ({}));
+  const rawJson = await res.json().catch(() => ({}));
+
   if (!res.ok) {
-    throw new Error(json?.message || res.statusText || "Failed");
+    throw new Error(rawJson?.message || res.statusText || "Failed");
   }
-  return coerceArray(json);
+
+  const unwrappedData = unwrapApiResponse(rawJson);
+  return coerceArray(unwrappedData);
 }
 
+/**
+ * Fetch thông số mới nhất của một thiết bị.
+ * @param {string} id - ID của thiết bị.
+ */
 export async function fetchLatest(id) {
   const res = await fetch(`${API_BASE}/devices/${encodeURIComponent(id)}/latest`);
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json?.message || res.statusText);
-  // unwrap giống trên:
-  if (json?.body) { try { return JSON.parse(json.body); } catch {} }
-  return json;
+  const rawJson = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(rawJson?.message || res.statusText);
+  }
+
+  return unwrapApiResponse(rawJson);
 }
 
-export async function fetchReadings(id, limit=20) {
+/**
+ * Fetch lịch sử thông số của một thiết bị.
+ * @param {string} id - ID của thiết bị.
+ * @param {number} limit - Số lượng bản ghi cần lấy.
+ */
+export async function fetchReadings(id, limit = 20) {
   const res = await fetch(`${API_BASE}/devices/${encodeURIComponent(id)}/readings?limit=${limit}`);
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json?.message || res.statusText);
-  if (Array.isArray(json)) return json;
-  if (json?.body) { try { const inner = JSON.parse(json.body); if (Array.isArray(inner)) return inner; } catch {} }
-  return [];
+  const rawJson = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(rawJson?.message || res.statusText);
+  }
+
+  const unwrappedData = unwrapApiResponse(rawJson);
+  // Đảm bảo luôn trả về một mảng
+  return Array.isArray(unwrappedData) ? unwrappedData : [];
 }

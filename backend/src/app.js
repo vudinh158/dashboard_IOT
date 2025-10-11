@@ -17,7 +17,7 @@ app.use(morgan("dev"));
 
 app.get("/health", (req, res) => res.json({ ok: true }));
 
-app.use("/", routes);
+app.use("/api", routes);
 
 // error handler cuối cùng
 app.use(errorHandler);
