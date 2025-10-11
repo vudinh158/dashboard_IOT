@@ -18,33 +18,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
+      id-token: write         # OIDC
       contents: read
 
     steps:
       - uses: actions/checkout@v4
 
-      # --- AUTH AWS (chọn 1 trong 2 cách) ---
-
-      # Cách khuyến nghị: OIDC (KHÔNG cần access key)
+      # 1) Đăng nhập AWS bằng OIDC vào role bạn vừa tạo
       - name: Configure AWS via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::602951639386:role/github-ecs-deployer # <--- sửa ARN role OIDC của bạn
+          role-to-assume: arn:aws:iam::602951639386:role/github-ecs-deployer   # đổi nếu bạn đặt tên khác
           aws-region: ${{ env.AWS_REGION }}
 
-      # Cách tạm thời (nếu chưa có OIDC): dùng secrets
-      # - uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ env.AWS_REGION }}
-
+      # 2) Login ECR
       - name: Login to Amazon ECR
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build & Push Docker image (backend/)
+      # 3) Build & push Docker image (Dockerfile nằm trong backend/)
+      - name: Build & Push Docker image
         uses: docker/build-push-action@v6
         with:
           context: ./backend
@@ -54,7 +47,27 @@ jobs:
             ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ env.IMAGE_TAG }}
             ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
 
+      # 4) Lấy task definition hiện tại
       - name: Get current task definition
         run: |
-          aws ecs describe-task-definition --task-definition $TASK_FAMILY \
-            --q
+          aws ecs describe-task-definition \
+            --task-definition $TASK_FAMILY \
+            --query taskDefinition > taskdef.json
+
+      # 5) Render taskdef với image mới (giữ nguyên ENV/port/log/roles)
+      - name: Render task definition with new image
+        id: render
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: taskdef.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ env.IMAGE_TAG }}
+
+      # 6) Deploy ECS và chờ stable
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
