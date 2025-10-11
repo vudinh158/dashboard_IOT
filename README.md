@@ -1,5 +1,7 @@
 # Bảng Điều Khiển Cảm Biến IoT (IoT Sensor Dashboard)
 
+
+
 ## Tổng Quan
 Đây là ứng dụng fullstack Bảng Điều Khiển Cảm Biến IoT để giám sát dữ liệu cảm biến giả lập (nhiệt độ, độ ẩm). Công nghệ sử dụng:
 - **Frontend**: React.js (Vite) cho giao diện dashboard (danh sách thiết bị, chi tiết thiết bị, trình mô phỏng).
