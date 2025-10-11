@@ -7,7 +7,7 @@ on:
 env:
   AWS_REGION: ap-southeast-1
   AWS_ACCOUNT_ID: 602951639386
-  ECR_REPO: ioi-backend
+  ECR_REPO: iot-backend
   ECS_CLUSTER: iot-cluster
   ECS_SERVICE: iot-backend-service-jttg1ou1
   TASK_FAMILY: iot-backend
