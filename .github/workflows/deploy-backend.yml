@@ -1,0 +1,60 @@
+name: Backend - Build & Deploy ECS
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  AWS_REGION: ap-southeast-1
+  AWS_ACCOUNT_ID: 602951639386
+  ECR_REPO: ioi-backend
+  ECS_CLUSTER: iot-cluster
+  ECS_SERVICE: iot-backend-service-jttg1ou1
+  TASK_FAMILY: iot-backend
+  CONTAINER_NAME: iot-backend
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- AUTH AWS (chọn 1 trong 2 cách) ---
+
+      # Cách khuyến nghị: OIDC (KHÔNG cần access key)
+      - name: Configure AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::602951639386:role/github-ecs-deployer # <--- sửa ARN role OIDC của bạn
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Cách tạm thời (nếu chưa có OIDC): dùng secrets
+      # - uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Docker image (backend/)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ env.IMAGE_TAG }}
+            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
+
+      - name: Get current task definition
+        run: |
+          aws ecs describe-task-definition --task-definition $TASK_FAMILY \
+            --q
