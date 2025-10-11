@@ -1,0 +1,36 @@
+{
+  "family": "iot-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::602951639386:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::602951639386:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "iot-backend",
+      "image": "602951639386.dkr.ecr.ap-southeast-1.amazonaws.com/iot-backend:latest",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/iot-task",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "environment": [
+        {
+          "name": "AWS_REGION",
+          "value": "ap-southeast-1"
+        }
+      ]
+    }
+  ]
+}
