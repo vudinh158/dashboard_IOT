@@ -17,9 +17,9 @@ const corsOptions = {
   origin: [LOCAL_DEV_URL, FRONTEND_URL]
 };
 
-app.use(helmet());
 app.use(express.json());
-app.use(cors(corsOptions));
+// app.use(helmet());
+// app.use(cors(corsOptions));
 app.use(morgan("dev"));
 
 app.get("/health", (req, res) => res.json({ ok: true }));

@@ -20,31 +20,31 @@ export async function ingest(req, res, next) {
   }
 }
 
-// export async function getDevices(req, res, next) {
-//   try {
-//     const data = await svc.listDevicesLatest();
-//     res.json(data);
-//   } catch (err) {
-//     next(err);
-//   }
-// }
-
 export async function getDevices(req, res, next) {
   try {
-    // BỎ QUA HOÀN TOÀN KẾT NỐI DATABASE
-    // Trả về một mẩu dữ liệu giả ngay lập tức để kiểm tra
-    const fakeData = [
-      { deviceId: "test-device-1", deviceName: "Fake Device Alpha" },
-      { deviceId: "test-device-2", deviceName: "Fake Device Beta" },
-    ];
-
-    // Gửi phản hồi ngay lập tức
-    res.status(200).json(fakeData);
-
+    const data = await svc.listDevicesLatest();
+    res.json(data);
   } catch (err) {
     next(err);
   }
 }
+
+// export async function getDevices(req, res, next) {
+//   try {
+//     // BỎ QUA HOÀN TOÀN KẾT NỐI DATABASE
+//     // Trả về một mẩu dữ liệu giả ngay lập tức để kiểm tra
+//     const fakeData = [
+//       { deviceId: "test-device-1", deviceName: "Fake Device Alpha" },
+//       { deviceId: "test-device-2", deviceName: "Fake Device Beta" },
+//     ];
+
+//     // Gửi phản hồi ngay lập tức
+//     res.status(200).json(fakeData);
+
+//   } catch (err) {
+//     next(err);
+//   }
+// }
 
 export async function getLatestById(req, res, next) {
   try {
