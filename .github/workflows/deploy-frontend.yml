@@ -12,7 +12,7 @@ on:
 env:
   AWS_REGION: ap-southeast-1
   S3_BUCKET_NAME: iot-dashboard-frontend-mcvn 
-  CLOUDFRONT_DISTRIBUTION_ID: E1QW4TCLVW7HVS 
+  CLOUDFRONT_DISTRIBUTION_ID: EQM4TLVW7N3N5 
 
 jobs:
   deploy:
