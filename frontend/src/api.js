@@ -1,4 +1,4 @@
-const API_BASE = "https://dl1ia0lsfuabj.cloudfront.net/api";
+import.meta.env.VITE_VITE_API_BASE
 
 
 
@@ -16,7 +16,7 @@ function coerceArray(data) {
 }
 
 export async function fetchDevices() {
-  const res = await fetch(`${API_BASE}/devices`);
+  const res = await fetch(`${VITE_API_BASE}/devices`);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(json?.message || res.statusText || "Failed");
@@ -25,7 +25,7 @@ export async function fetchDevices() {
 }
 
 export async function fetchLatest(id) {
-  const res = await fetch(`${API_BASE}/devices/${encodeURIComponent(id)}/latest`);
+  const res = await fetch(`${VITE_API_BASE}/devices/${encodeURIComponent(id)}/latest`);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(json?.message || res.statusText);
   if (json?.body) { try { return JSON.parse(json.body); } catch {} }
@@ -33,7 +33,7 @@ export async function fetchLatest(id) {
 }
 
 export async function fetchReadings(id, limit = 20) {
-  const res = await fetch(`${API_BASE}/devices/${encodeURIComponent(id)}/readings?limit=${limit}`);
+  const res = await fetch(`${VITE_API_BASE}/devices/${encodeURIComponent(id)}/readings?limit=${limit}`);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(json?.message || res.statusText);
   if (Array.isArray(json)) return json;
