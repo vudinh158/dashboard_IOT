@@ -1,4 +1,4 @@
-const API_BASE = "https://d11ia0lsfuabj.cloudfront.net/api";
+const API_BASE = "https://dl1ia0lsfuabj.cloudfront.net/api";
 
 
 
