@@ -1,4 +1,4 @@
-const API_BASE = "http://iot-backend-alb-1873084970.ap-southeast-1.elb.amazonaws.com";
+const API_BASE = "https://d11ia0lsfuabj.cloudfront.net/api";
 
 
 
