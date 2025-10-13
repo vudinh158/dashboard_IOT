@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://az5hwgyc06.execute-api.ap-southeast-1.amazonaws.com";
 
 function coerceArray(data) {
   // data là JSON đã parse từ fetch
