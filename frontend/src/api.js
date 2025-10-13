@@ -1,11 +1,10 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
+const API_BASE = "http://iot-backend-alb-1873084970.ap-southeast-1.elb.amazonaws.com";
+
+
 
 function coerceArray(data) {
-  // data là JSON đã parse từ fetch
-  if (Array.isArray(data)) return data;                     // OK: mảng
-  if (data?.Items && Array.isArray(data.Items)) return data.Items; // kiểu DynamoDB raw
-
-  // Một số cấu hình API Gateway/Lambda trả { statusCode, body: "json-string" }
+  if (Array.isArray(data)) return data;
+  if (data?.Items && Array.isArray(data.Items)) return data.Items;
   if (data?.body) {
     try {
       const inner = typeof data.body === "string" ? JSON.parse(data.body) : data.body;
@@ -13,7 +12,7 @@ function coerceArray(data) {
       if (inner?.Items && Array.isArray(inner.Items)) return inner.Items;
     } catch (_) { /* ignore */ }
   }
-  return []; // fallback
+  return [];
 }
 
 export async function fetchDevices() {
@@ -29,12 +28,11 @@ export async function fetchLatest(id) {
   const res = await fetch(`${API_BASE}/devices/${encodeURIComponent(id)}/latest`);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(json?.message || res.statusText);
-  // unwrap giống trên:
   if (json?.body) { try { return JSON.parse(json.body); } catch {} }
   return json;
 }
 
-export async function fetchReadings(id, limit=20) {
+export async function fetchReadings(id, limit = 20) {
   const res = await fetch(`${API_BASE}/devices/${encodeURIComponent(id)}/readings?limit=${limit}`);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(json?.message || res.statusText);

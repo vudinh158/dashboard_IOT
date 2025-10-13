@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE ||
-  "http://localhost:8080";
+  "https://az5hwgyc06.execute-api.ap-southeast-1.amazonaws.com";
 
 function makeReading(prev) {
   const t = (prev?.t ?? 28) + (Math.random() * 2 - 1);      // 27..29
