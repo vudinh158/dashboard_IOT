@@ -1,4 +1,4 @@
-const API_BASE = "http://iot-backend-alb-1873084970.ap-southeast-1.elb.amazonaws.com";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://az5hwgyc06.execute-api.ap-southeast-1.amazonaws.com";
 
 
 
