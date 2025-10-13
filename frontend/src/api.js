@@ -1,4 +1,3 @@
-#const API_BASE = import.meta.env.VITE_API_BASE || "https://az5hwgyc06.execute-api.ap-southeast-1.amazonaws.com";
 const API_BASE = import.meta.env.VITE_API_BASE || "/api";
 
 
