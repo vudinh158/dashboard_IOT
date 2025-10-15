@@ -4,23 +4,18 @@ import devicesRouter from "./routes/devices.js";
 import errorHandler from "./middlewares/error.js";
 
 const app = express();
-
 app.use(morgan("dev"));
-app.use(express.json());              // <— quan trọng: nhận JSON body
+app.use(express.json());
 
-// Health cho Target Group
-app.get("/health", (_req, res) => res.status(200).json({ ok: true, path: "/health" }));
+app.get("/health", (_req, res) => res.status(200).json({ ok: true }));
+app.get("/api/health", (_req, res) => res.status(200).json({ ok: true, via: "cf" }));
 
-// Health qua CloudFront
-app.get("/api/health", (_req, res) => res.status(200).json({ ok: true, path: "/api/health" }));
+app.use("/api", devicesRouter);
 
-// Mount toàn bộ API thật dưới prefix /api
-app.use("/api", devicesRouter);       // <— router hiện đang định nghĩa /devices, /ingest, ...
-
-// Error handler (để trả JSON gọn)
+// đặt cuối cùng
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`API listening on :${PORT}`));
+app.listen(PORT, () => console.log("API on", PORT));
 
 export default app;
