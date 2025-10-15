@@ -1,31 +1,37 @@
 import { Router } from "express";
-import * as ctrl from "../controllers/devices.controller.js";
+import {
+  getDevices,
+  getLatestById,
+  getReadingsById,
+  ingest,
+} from "../controllers/devices.controller.js";
 import { validateBody, validateQuery } from "../middlewares/validate.js";
 
 const router = Router();
 
-// POST /ingest
+// Nhận dữ liệu từ thiết bị / simulator
 router.post(
   "/ingest",
   validateBody({
     deviceId: "string",
     temperature: "number?",
     humidity: "number?",
+    ts: "string?",
   }),
-  ctrl.ingest
+  ingest
 );
 
-// GET /devices (danh sách + last reading mỗi thiết bị)
-router.get("/devices", ctrl.getDevices);
+// Danh sách thiết bị (mỗi device 1 bản mới nhất)
+router.get("/devices", getDevices);
 
-// GET /devices/:id/latest
-router.get("/devices/:id/latest", ctrl.getLatestById);
+// Bản ghi mới nhất theo deviceId
+router.get("/devices/:id/latest", getLatestById);
 
-// GET /devices/:id/readings?limit=N
+// Lịch sử readings theo deviceId
 router.get(
   "/devices/:id/readings",
   validateQuery({ limit: "number?" }),
-  ctrl.getReadingsById
+  getReadingsById
 );
 
 export default router;
