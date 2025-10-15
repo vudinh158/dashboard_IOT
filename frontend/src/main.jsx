@@ -18,7 +18,7 @@ function Layout({ children }) {
       <hr />
       <main>{children}</main>
       <footer style={{ marginTop: 24, fontSize: 12, opacity: 0.7 }}>
-        Demo dashboard (DynamoDB + API Gateway + Lambda)
+        Demo Iot-Dashboard
       </footer>
     </div>
   );
