@@ -1,6 +1,11 @@
 export default function errorHandler(err, req, res, _next) {
-  console.error("[ERROR]", err);
-  const status = err.status || err.statusCode || 500;
-  const msg = err.message || "internal_error";
-  res.status(status).json({ error: msg });
+  // log đầy đủ để xem trên CloudWatch
+  console.error(
+    "[ERR]",
+    err.name || "Error",
+    err.message,
+    { path: req.method + " " + req.originalUrl, stack: err.stack }
+  );
+  const code = err.status || err.statusCode || 500;
+  res.status(code).json({ error: err.name || "Error", message: err.message });
 }
